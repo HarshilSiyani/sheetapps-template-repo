@@ -42,7 +42,9 @@ export class SheetClient {
       }
       
       // Convert to sheet coordinates (A1 notation)
-      const range = this.getA1Notation(rowIndex + 1, columnIndex); // +1 for 0-based to 1-based
+      // rowIndex is 0-based array index, but sheet rows start at 1 and row 1 is header
+      // So data row at array index 0 = sheet row 2, array index 1 = sheet row 3, etc.
+      const range = this.getA1Notation(rowIndex + 2, columnIndex); // +2 to account for header row
       
       const response = await this.makeRequest('POST', `/sheets/${this.config.sheetId}/update`, {
         range,
@@ -203,7 +205,7 @@ export class SheetClient {
     return dataRows.map((row, index) => {
       const rowObject: SheetRow = {
         _id: row[0] || `row_${index + 1}`, // Use first column as ID or generate
-        _rowIndex: index + 1, // 1-based row index (excluding header)
+        _rowIndex: index + 2, // Actual sheet row number (header=1, first data=2, etc.)
       };
       
       // Robust mapping that handles misaligned data
